@@ -293,3 +293,12 @@ If you find our work useful in your research, we gratefully request that you con
       url={https://arxiv.org/abs/2507.02546}, 
 }
 ```
+
+
+
+ python uav_measure_demo.py \
+  example_images/DJI_0066.jpg \
+  --output output/DJl_dist1.png \
+  --checkpoint /root/mycode/MoGe/pretrained/moge-2-vits-normal.pt \
+  --y1 185 --x1 279 \
+  --y2 353 --x2 247

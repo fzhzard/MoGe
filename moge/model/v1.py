@@ -225,15 +225,29 @@ class MoGeModel(nn.Module):
         - A new instance of `MoGe` with the parameters loaded from the checkpoint.
         """
         if Path(pretrained_model_name_or_path).exists():
-            checkpoint = torch.load(pretrained_model_name_or_path, map_location='cpu', weights_only=True)
+            checkpoint_path = pretrained_model_name_or_path
+            is_local = True
         else:
-            cached_checkpoint_path = hf_hub_download(
+            checkpoint_path = hf_hub_download(
                 repo_id=pretrained_model_name_or_path,
                 repo_type="model",
                 filename="model.pt",
                 **hf_kwargs
             )
-            checkpoint = torch.load(cached_checkpoint_path, map_location='cpu', weights_only=True)
+            is_local = False
+
+        try:
+            checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=True)
+        except Exception as e:
+            if is_local:
+                warnings.warn(
+                    f"Failed to load checkpoint with weights_only=True ({e}). "
+                    "Falling back to weights_only=False because the file is local. "
+                    "Only do this when you trust the checkpoint source."
+                )
+                checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
+            else:
+                raise
         model_config = checkpoint['model_config']
         if model_kwargs is not None:
             model_config.update(model_kwargs)
